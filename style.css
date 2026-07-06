@@ -21,9 +21,11 @@
 body {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    grid-template-columns: min(800px, 100%);
+    grid-template-columns: min(1200px, 100%);
     justify-content: center;
+    row-gap: 1rem;
     min-block-size: 100vb;
+    text-align: center;
     margin-inline: 1rem;
 }
 
@@ -33,21 +35,21 @@ header {
 }
 
 h1 {
-    text-align: center;
     text-transform: uppercase;
     text-shadow: 1px 0 1px;
 }
 
 main {
-    display: grid;
-    place-items: center;
+    align-content: center;
+    font-size: 1.5rem;
 }
 
 form {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    inline-size: min(600px, 100%);
+    inline-size: min(700px, 100%);
+    margin-inline: auto;
 }
 
 input,
@@ -65,13 +67,23 @@ input {
 button {
     background-color: #0275d8;
     color: honeydew;
+    min-inline-size: 150px;
     border: none;
     cursor: pointer;
-    padding: 8px 16px;
 
     &:hover {
         background-color: #0088ff;
     }
+
+    &:disabled {
+        background-color: #3891de;
+        cursor: not-allowed;
+    }
+}
+
+img {
+    opacity: 0;
+    transition: opacity 0.1s ease;
 }
 
 .weather {
@@ -79,17 +91,26 @@ button {
     justify-content: space-evenly;
     align-items: center;
     flex-wrap: wrap;
-    inline-size: 100%;
-    text-align: center;
-    font-size: 1.8rem;
+}
+
+.forecast {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 240px);
+    justify-content: center;
+    row-gap: 1rem;
+}
+
+.card {
+    border: 1px solid;
+    padding: 1rem;
 }
 
 .error {
-    color: red;
+    color: #ef4444;
+    margin-block-start: 1rem;
 }
 
 footer {
     border-block-start: 2px solid;
-    text-align: center;
     padding-block: 1rem;
 }
