@@ -45,9 +45,6 @@ main {
 }
 
 form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
     inline-size: min(700px, 100%);
     margin-inline: auto;
 }
@@ -56,20 +53,33 @@ input,
 button {
     font-size: inherit;
     border-radius: 4px;
+    block-size: 50px;
 }
 
 input {
-    flex: 1 1 400px;
+    inline-size: 100%;
     border-style: solid;
     padding: 8px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block: 1rem;
 }
 
 button {
     background-color: #0275d8;
     color: honeydew;
-    min-inline-size: 150px;
     border: none;
     cursor: pointer;
+    padding-inline: 16px;
+
+    &[type="submit"] {
+        min-inline-size: 160px;
+    }
 
     &:hover {
         background-color: #0088ff;

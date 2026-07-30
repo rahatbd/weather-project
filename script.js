@@ -1,16 +1,27 @@
 const form = document.querySelector('form');
-const button = form.querySelector('button');
+const searchButton = form.querySelector('button[type="submit"]');
+const defaultButton = form.querySelector('button[type="button"]');
 const weather = document.querySelector('.weather');
 const forecast = document.querySelector('.forecast');
+let currentCity, abortController;
 
 function imageLoadHandler(element) {
     element.querySelectorAll('img').forEach(img => img.addEventListener('load', () => (img.style.opacity = 1)));
+}
+
+function updateDefaultButton() {
+    const defaultCity = localStorage.getItem('city');
+    defaultButton.textContent = defaultCity === currentCity ? '★ Remove Default' : '☆ Set as Default';
 }
 
 function renderWeather(data) {
     const {temp} = data.main;
     const {name} = data;
     const {main, description, icon} = data.weather[0];
+
+    currentCity = name;
+    defaultButton.disabled = false;
+    updateDefaultButton();
 
     weather.innerHTML = `
         <div>
@@ -77,12 +88,13 @@ function renderForecast(data) {
 }
 
 function renderError(message) {
+    defaultButton.disabled = true;
     weather.innerHTML = `<p class="error">✘ ${message}</p>`;
     forecast.replaceChildren();
 }
 
-async function fetchData(endpoint, city) {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/${endpoint}?q=${city}&units=metric&appid=${API_KEY}`);
+async function fetchData(endpoint, city, signal) {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/${endpoint}?q=${city}&units=metric&appid=${API_KEY}`, {signal});
     const {ok, status} = response;
     if (!ok) {
         if (status === 404) throw new Error('City not found.');
@@ -91,23 +103,50 @@ async function fetchData(endpoint, city) {
     return response.json();
 }
 
-async function handleSubmit(event) {
-    event.preventDefault();
-    const city = form.city.value.trim();
-    if (!city) return renderError('Please enter a city name.');
-    button.textContent = 'Searching...';
-    button.disabled = true;
+async function searchWeather(city) {
+    if (abortController) abortController.abort();
+    abortController = new AbortController();
+    const {signal} = abortController;
+    searchButton.textContent = 'Searching...';
+    searchButton.disabled = true;
     try {
-        const [weatherData, forecastData] = await Promise.all([fetchData('weather', city), fetchData('forecast', city)]);
+        const [weatherData, forecastData] = await Promise.all([fetchData('weather', city, signal), fetchData('forecast', city, signal)]);
         renderWeather(weatherData);
         renderForecast(forecastData);
     } catch (error) {
+        if (error.name === 'AbortError') return;
         console.error(error);
         renderError(error.message);
     } finally {
-        button.textContent = 'Search';
-        button.disabled = false;
+        if (!signal.aborted) {
+            searchButton.textContent = 'Search';
+            searchButton.disabled = false;
+        }
+    }
+}
+
+function handleSubmit(event) {
+    event.preventDefault();
+    const city = form.city.value.trim();
+    if (!city) return renderError('Please enter a city name.');
+    searchWeather(city);
+}
+
+function handleClick() {
+    const defaultCity = localStorage.getItem('city');
+    defaultCity === currentCity ? localStorage.removeItem('city') : localStorage.setItem('city', currentCity);
+    updateDefaultButton();
+}
+
+function defaultWeather() {
+    const defaultCity = localStorage.getItem('city');
+    defaultButton.disabled = true;
+    if (defaultCity) {
+        form.city.value = defaultCity;
+        searchWeather(defaultCity);
     }
 }
 
 form.addEventListener('submit', handleSubmit);
+defaultButton.addEventListener('click', handleClick);
+defaultWeather();

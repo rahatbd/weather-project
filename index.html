@@ -20,7 +20,10 @@
         <form>
             <label for="city" class="sr-only">Search Weather</label>
             <input id="city" name="city" placeholder="Enter city name..." required>
-            <button>Search</button>
+            <div class="buttons">
+                <button type="submit">Search</button>
+                <button type="button">☆ Set as Default</button>
+            </div>
         </form>
 
         <div class="weather" aria-live="polite"><!-- render current weather --></div>
